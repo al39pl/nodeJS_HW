@@ -6,16 +6,24 @@ class DirWatcher extends EventEmmiter {
 
     constructor(){
        super();      
+       this.changedFiles = []
     }    
 
     watch(path, delay){
-        let self = this;
-        self.watch = fs.watch(path, (type, filename) => {
-             setTimeout(function(){
+        let changedFiles = this.changedFiles
+        this.watch = fs.watch(path, (type, filename) => {
+            
+            if(!changedFiles.indexOf(filename)){
+                changedFiles.push[filename];
+
+            }            
+
+             setTimeout(()=> {
                  console.log("### Emit dirwatcher:changed")
-                 self.emit("dirwatcher:changed", filename)                
-             }, delay)
+                 this.emit("dirwatcher:changed", filename)                
+             }, delay) 
          });
+
     }
 }
 

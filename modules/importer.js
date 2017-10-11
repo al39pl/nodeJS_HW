@@ -21,20 +21,26 @@ class Importer extends EventEmmiter {
 
     parseCsvToJson(csv){
         let csvArray = csv.split("\r\n")
+        let header = csvArray[0].split(',')
+
         let dataJson = {data: []}
+
         for(let row = 1; row < csvArray.length; row++){
             let data = {}
-            for(let p = 0; p < csvArray[0].length; p++){
-                data[csvArray[0][p]] = csvArray[row][p]
+            let values =  csvArray[row].split(",")
+
+            for(let p = 0; p < header.length; p++){
+                data[header[p]] =  values[p]
             }
             dataJson.data.push(data)
         }
+
         return dataJson;
     }
 
     import(path){     
         const filePath = path + this.changedFile;   
-        return readFileAsync(filePath, "utf8")        
+        return readFileAsync(filePath, "utf8").then(d => Promise.resolve(this.parseCsvToJson(d)));        
     }
 
     importSync(path){    
