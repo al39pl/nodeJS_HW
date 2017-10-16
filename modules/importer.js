@@ -1,7 +1,6 @@
 'use strict'
 const fs = require('fs')
 const EventEmmiter = require('events')
-const csv = require('csvtojson')
 const promisify = require('promisify-node')
 const readFileAsync = promisify(fs.readFile)
 
@@ -10,11 +9,11 @@ class Importer extends EventEmmiter {
     constructor(watcher){
         super();
         let self = this;
-        self.changedFile = null;
+        self.changedFiles = null;
 
         watcher.on("dirwatcher:changed", function(data){
             console.log(`## Captured dirwatcher:changed, changed file: ${data}`)
-            self.changedFile = data;
+            self.changedFiles = data;
         })       
         
     }    
@@ -38,16 +37,28 @@ class Importer extends EventEmmiter {
         return dataJson;
     }
 
-    import(path){     
-        const filePath = path + this.changedFile;   
-        return readFileAsync(filePath, "utf8").then(d => Promise.resolve(this.parseCsvToJson(d)));        
+    import(path){
+        const changedFiles = this.changedFiles;
+        let promises = []
+
+        for(let f = 0; f < changedFiles.length; f++){
+            promises.push(readFileAsync(path + changedFiles[f], "utf8").then(d => Promise.resolve(this.parseCsvToJson(d))))
+        }
+        return Promise.all(promises)
     }
 
-    importSync(path){    
-        const filePath = path + this.changedFile;
-        let d = fs.readFileSync(filePath, "utf8")
-       
-        return this.parseCsvToJson(d)
+    importSync(path){
+        const changedFiles = this.changedFiles;
+        let jsonData = [];
+        try {
+            for(let f = 0; f < changedFiles.length; f++){
+                jsonData.push(this.parseCsvToJson(fs.readFileSync(path + changedFiles[f], "utf8")))
+            }
+            return jsonData
+        }catch(e){
+            console.log(`### ${e}`)
+        }
+
     }
 
 
