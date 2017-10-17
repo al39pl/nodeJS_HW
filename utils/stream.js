@@ -1,5 +1,5 @@
 'use strict'
-const argv = require('yargs').argv;
+const yargs = require('yargs');
 const through2= require('through2');
 const fs = require('fs');
 const Parsers = require("./parsers.js");
@@ -32,11 +32,26 @@ let csvToJsonWrite = (path) => {
         this.push( json );
     })).on('data', function (data) {        
         fs.createWriteStream(`data/${pathService.basename(path, pathService.extname(path))}.json`)
-            .write(JSON.stringify( data ))
+        .write(JSON.stringify( data ))
     })
 
    
 }
+
+const argv = yargs.command("run", "runs the app", {
+        action: {
+            describe: "Action to perform",
+            demand: true,
+            alias: 'a'
+        },
+        file: {
+            describe: "File to be modified",
+            demand: true,
+            alias: 'f'
+        }
+    })
+    .help()
+    .argv;
 
 switch(argv.action){
 
