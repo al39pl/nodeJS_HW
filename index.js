@@ -1,6 +1,7 @@
 const config = require("./config");
 const models = require("./models");
 const modules = require("./modules");
+const utils = require("./utils");
 
 console.log(config.name);
 
@@ -24,3 +25,5 @@ dirWatch.on("dirwatcher:changed", function(){
         console.log(data)
     })
 })
+
+utils.ReadCmd()

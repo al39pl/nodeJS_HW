@@ -13,8 +13,13 @@
     "babel-preset-stage-2": "^6.24.1",
     "babel-register": "^6.26.0",
     "nodemon": "^1.12.1",
-    "promisify-node": "^0.4.0"
+    "promisify-node": "^0.4.0",
+    "request": "^2.83.0",
+    "through2": "^0.6.5"
   },
   "author": "Alexander Pleshcheev",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "yargs": "^9.0.1"
+  }
 }
