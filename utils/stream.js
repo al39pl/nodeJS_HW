@@ -3,6 +3,7 @@ const argv = require('yargs').argv;
 const through2= require('through2');
 const fs = require('fs');
 const Parsers = require("./parsers.js");
+const pathService = require('path');
 
 let io = (path) => {  
     let stream = fs.createReadStream(path);
@@ -28,14 +29,13 @@ let csvToJson = (path) => {
 let csvToJsonWrite = (path) => {  
     let stream = fs.createReadStream(path).pipe(through2.obj(function(chunk, enc, callback){
         let json = Parsers(chunk.toString());
+        this.push( json );
+    })).on('data', function (data) {        
+        fs.createWriteStream(`data/${pathService.basename(path, pathService.extname(path))}.json`)
+            .write(JSON.stringify( data ))
+    })
 
-        console.log('########################')
-        console.log(enc)
-
-        var wstream = fs.createWriteStream('data/file.json');
-        wstream.write(JSON.stringify( json ));
-        wstream.end();
-    }))      
+   
 }
 
 switch(argv.action){
