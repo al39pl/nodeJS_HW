@@ -11,31 +11,51 @@ let io = (path) => {
 }
 
 let upperCase = (path) => {  
-    let stream = fs.createReadStream(path).pipe(through2.obj(function(chunk){
+    let stream = fs.createReadStream(path).pipe(through2.obj(function(chunk, enc, callback){
         let string = chunk.toString().toUpperCase() 
-        this.push(string)         
+        this.push(string)  
+        callback();
     }))    
     stream.pipe(process.stdout)
 }
 
 let csvToJson = (path) => {  
-    let stream = fs.createReadStream(path).pipe(through2.obj(function(chunk){
-        let json = Parsers(chunk.toString());
-        this.push( JSON.stringify( json ));
+    let headers = "";
+    let string = "";
+    let stream = fs.createReadStream(path).pipe(through2.obj(function(chunk, enc, callback){  
+        
+        string += chunk.toString();
+        this.push( JSON.stringify( Parsers(string)));
+        callback();
     }))     
     stream.pipe(process.stdout)
 }
 
 let csvToJsonWrite = (path) => {  
-    let stream = fs.createReadStream(path).pipe(through2.obj(function(chunk, enc, callback){
-        let json = Parsers(chunk.toString());
-        this.push( json );
-    })).on('data', function (data) {        
-        fs.createWriteStream(`data/${pathService.basename(path, pathService.extname(path))}.json`)
-        .write(JSON.stringify( data ))
+    let string = "";
+    let stream = fs.createReadStream(path).pipe(through2.obj(function(chunk, enc, callback){        
+        string += chunk.toString();
+        callback();
+    })).on('data', function () {                  
+        fs.createWriteStream(`../data/${pathService.basename(path, pathService.extname(path))}.json`)
+        .write(JSON.stringify( Parsers(string) ))
     })
 
    
+}
+
+let gen = () => {  
+    let data = "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p\r\n"
+
+    for (var i = 1; i <= 200000; i++){
+        data = data + i + ",";
+        if(i%16 == 0 && i != 0){
+            data += "\r\n"
+        }
+    }
+    
+    fs.createWriteStream("../data/data_three.csv")
+    .write(data) 
 }
 
 const argv = yargs.command("run", "runs the app", {
@@ -67,8 +87,14 @@ switch(argv.action){
         csvToJson(argv.file)
     break
 
+    case ("gen"):
+        gen(argv.file)
+    break
+
     case ("csvToJsonWrite"):
         csvToJsonWrite(argv.file)
     break
 }
+
+module.exports = { io, upperCase, csvToJson,  csvToJsonWrite }
 
